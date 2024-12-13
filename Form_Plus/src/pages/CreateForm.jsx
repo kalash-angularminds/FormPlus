@@ -8,6 +8,7 @@ import { addQuestion, setInitialState } from "@/features/FormSlice";
 import { CirclePlus } from "lucide-react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast"
+import { useNavigate } from "react-router-dom";
 
 
 function CreateForm() {
@@ -16,6 +17,7 @@ function CreateForm() {
   const questions = useSelector((state) => state.form.questions);
   const formTitle = useSelector((state) => state.form.title);
   const formDescription = useSelector((state) => state.form.description);
+  const navigate = useNavigate();
   async function handleSubmit(e) {
     e.preventDefault();
     const payload = {
@@ -30,11 +32,14 @@ function CreateForm() {
         payload,
       );
       console.log("response: ", response);
+      console.log("form created here")
+      navigate("/");
       if (response?.status === 201) {
         toast({
-          title: "Form Created"
+          title: "Form Created Successfully",
+          // description: "Url copied to board"
         })
-        console.log(response?.data);
+
       }
     } catch (error) {
       console.log("Error creating form: ", error);
@@ -47,28 +52,28 @@ function CreateForm() {
       description: "",
       questions: [],
     };
-    
-    dispatch(setInitialState(payload)); 
-    
-  },[])
+
+    dispatch(setInitialState(payload));
+
+  }, [])
 
   return (
     <CreateFormLayout>
       <form>
-      <FormBanner />
-      {questions.map((question, index) => (
-        <FormField key={index} index={index} />
-      ))}
-      <div className="flex justify-end">
-        <span
-          className="cursor-pointer text-white"
-          onClick={() => dispatch(addQuestion())}
-        >
-          <CirclePlus size={40}></CirclePlus>
-        </span>
-        <Button type="submit" onClick={handleSubmit}>
-          Create Form 
-        </Button>
+        <FormBanner />
+        {questions.map((question, index) => (
+          <FormField key={index} index={index} />
+        ))}
+        <div className="flex justify-end">
+          <span
+            className="cursor-pointer text-white"
+            onClick={() => dispatch(addQuestion())}
+          >
+            <CirclePlus size={40}></CirclePlus>
+          </span>
+          <Button type="submit" onClick={handleSubmit}>
+            Create Form
+          </Button>
         </div>
       </form>
     </CreateFormLayout>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { BASE_URL } from "@/constants";
 
 import { addQuestion, setInitialState } from "@/features/FormSlice";
+import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { CirclePlus } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -13,6 +14,7 @@ import { useNavigate, useParams } from "react-router-dom";
 function UpdateForm() {
   const [apiPayload, setApiPayload] = useState({});
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { id } = useParams();
   const dispatch = useDispatch();
   const questions = useSelector((state) => state.form?.questions);
@@ -30,6 +32,34 @@ function UpdateForm() {
   }
   async function updateForm(e) {
     e.preventDefault();
+    if (!formTitle) {
+      toast({
+        title: "Enter Title",
+        description: "Title is required",
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (questions.length <= 0) {
+      toast({
+        title: "Add Question",
+        description: "Question is required",
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const missingTitle = questions.some(question => !question.title || question.title.trim() === "");
+
+    if (missingTitle) {
+      toast({
+        title: "Missing Title",
+        description: "All questions must have a title",
+        variant: 'destructive',
+      });
+      return;
+    }
     const payload = {
       title: formTitle,
       description: formDescription,
@@ -45,6 +75,9 @@ function UpdateForm() {
       console.log("response: ", response);
       if (response?.status === 201) {
         console.log(response?.data);
+        toast({
+          title: "Form Updated",
+        });
       }
     } catch (error) {
       console.log("Error creating form: ", error);

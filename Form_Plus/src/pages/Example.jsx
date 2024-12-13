@@ -11,6 +11,7 @@ import axios from "axios";
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 
 export function Example() {
@@ -19,9 +20,39 @@ export function Example() {
     const questions = useSelector((state) => state.form.questions);
     const formTitle = useSelector((state) => state.form.title);
     const formDescription = useSelector((state) => state.form.description);
+    const navigate = useNavigate();
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!formTitle) {
+            toast({
+                title: "Enter Title",
+                description: "Title is required",
+                 variant: 'destructive',
+            });
+            return;
+        }
+
+        if (questions.length <= 0) {
+            toast({
+                title: "Add Question",
+                description: "Question is required",
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        const missingTitle = questions.some(question => !question.title || question.title.trim() === "");
+
+        if (missingTitle) {
+            toast({
+                title: "Missing Title",
+                description: "All questions must have a title",
+                variant: 'destructive',
+            });
+            return;
+        }
+
         const payload = {
             title: formTitle,
             description: formDescription,
@@ -35,10 +66,12 @@ export function Example() {
             );
             console.log("response: ", response);
             if (response?.status === 201) {
+                navigator.clipboard.writeText(`http://localhost:5173/form/${response?.data.data._id}`); 
                 toast({
                     title: "Form Created",
+                    description: "Form link copied to clipboard"
                 });
-                console.log(response?.data);
+                navigate("/");
             }
         } catch (error) {
             console.log("Error creating form: ", error);
